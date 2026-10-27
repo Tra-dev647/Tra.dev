@@ -6,8 +6,9 @@ import { fetchPaymentStatus } from "@/lib/payment";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { orderNumber: string } }
+  { params: _p }: { params: Promise<{ orderNumber: string }> }
 ) {
+  const params = await _p;
   let order = await prisma.order.findUnique({
     where: { orderNumber: params.orderNumber.toUpperCase() },
     include: {

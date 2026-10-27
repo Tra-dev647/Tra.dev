@@ -11,8 +11,9 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { orderNumber: string } }
+  { params: _p }: { params: Promise<{ orderNumber: string }> }
 ) {
+  const params = await _p;
   const order = await prisma.order.findUnique({
     where: { orderNumber: params.orderNumber },
   });

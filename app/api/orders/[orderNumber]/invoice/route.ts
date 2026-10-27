@@ -340,8 +340,9 @@ function renderPdf(order: {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { orderNumber: string } }
+  { params: _p }: { params: Promise<{ orderNumber: string }> }
 ) {
+  const params = await _p;
   const order = await prisma.order.findUnique({
     where: { orderNumber: params.orderNumber.toUpperCase() },
     include: {

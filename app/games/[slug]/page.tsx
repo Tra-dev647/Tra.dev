@@ -8,7 +8,8 @@ import { ArrowLeft, Zap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function GamePage({ params }: { params: { slug: string } }) {
+export default async function GamePage({ params: _p }: { params: Promise<{ slug: string }> }) {
+  const params = await _p;
   const game = await prisma.game.findUnique({
     where: { slug: params.slug },
     include: {

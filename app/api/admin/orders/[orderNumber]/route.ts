@@ -1,4 +1,4 @@
-﻿import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 import { writeAudit } from "@/lib/audit";
@@ -22,8 +22,9 @@ const updateSchema = z.object({
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { orderNumber: string } }
+  { params: _p }: { params: Promise<{ orderNumber: string }> }
 ) {
+  const params = await _p;
   const order = await prisma.order.findUnique({
     where: { orderNumber: params.orderNumber },
     include: {
@@ -37,8 +38,9 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { orderNumber: string } }
+  { params: _p }: { params: Promise<{ orderNumber: string }> }
 ) {
+  const params = await _p;
   const body = await req.json().catch(() => ({}));
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) {

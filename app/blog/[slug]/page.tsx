@@ -9,10 +9,11 @@ import { ArrowLeft } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params: _p }: Props): Promise<Metadata> {
+  const params = await _p;
   const post = await prisma.blogPost.findUnique({ where: { slug: params.slug } });
   if (!post || !post.published) return { title: "Not found" };
   return {
@@ -41,7 +42,8 @@ function renderContent(raw: string) {
   ));
 }
 
-export default async function BlogPostPage({ params }: Props) {
+export default async function BlogPostPage({ params: _p }: Props) {
+  const params = await _p;
   const post = await prisma.blogPost.findUnique({ where: { slug: params.slug } });
   if (!post || !post.published) notFound();
 
