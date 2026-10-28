@@ -202,7 +202,7 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Active payment */}
+            {/* Active payment (Bakong KHQR) */}
             {!isPaid && !isExpired && (
               <div className="space-y-6">
                 <div className="text-center">
@@ -210,7 +210,7 @@ export default function CheckoutPage() {
                     Complete Your Payment
                   </h1>
                   <p className="text-fox-muted text-sm">
-                    Use any KHQR-compatible app: ABA Pay, ACLEDA, Wing, TrueMoney, Prince Bank...
+                    Scan with Bakong or any KHQR-compatible app: ABA Pay, ACLEDA, Wing, TrueMoney, Prince Bank...
                   </p>
                 </div>
 
@@ -237,7 +237,7 @@ export default function CheckoutPage() {
                           <>
                             <AlertCircle className="h-14 w-14 mb-3 text-yellow-500" />
                             <p className="text-sm font-semibold text-gray-700">
-                              Could not create the payment QR
+                              Could not connect to payment provider
                             </p>
                             <p className="text-xs px-4 mt-2 text-gray-500">
                               Please try creating a new order. If this persists, contact support.

@@ -58,8 +58,8 @@ function renderPdf(order: {
     doc.rect(0, headerH, pageW, 6).fill(BRAND.primary);
 
     // Brand lockup
-    doc.fillColor(BRAND.primary).font("Helvetica-Bold").fontSize(26).text("RITH", marginX, 44);
-    const brandW = doc.widthOfString("RITH");
+    doc.fillColor(BRAND.primary).font("Helvetica-Bold").fontSize(26).text("TRA", marginX, 44);
+    const brandW = doc.widthOfString("TRA");
     doc
       .fillColor("#ffffff")
       .fontSize(26)
@@ -69,7 +69,7 @@ function renderPdf(order: {
       .font("Helvetica")
       .fontSize(9)
       .text("Instant game top-up · Cambodia", marginX, 76);
-    doc.fillColor("#94a3b8").fontSize(8).text("support: @rithtopup on Telegram", marginX, 90);
+    doc.fillColor("#94a3b8").fontSize(8).text("support: @Tradev14 on Telegram", marginX, 90);
 
     // INVOICE title right
     doc
@@ -322,7 +322,7 @@ function renderPdf(order: {
       .fillColor(BRAND.primary)
       .font("Helvetica-Bold")
       .fontSize(9)
-      .text("Telegram: @rithtopup", marginX, footerY + 78);
+      .text("Telegram: @Tradev14", marginX, footerY + 78);
     doc
       .fillColor("#94a3b8")
       .font("Helvetica")
@@ -340,9 +340,8 @@ function renderPdf(order: {
 
 export async function GET(
   _req: NextRequest,
-  { params: _p }: { params: Promise<{ orderNumber: string }> }
+  { params }: { params: { orderNumber: string } }
 ) {
-  const params = await _p;
   const order = await prisma.order.findUnique({
     where: { orderNumber: params.orderNumber.toUpperCase() },
     include: {

@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const [games, banners] = await Promise.all([
     prisma.game.findMany({
-      where: { active: true },
+      where: { active: true, slug: "mobile-legends" },
       orderBy: [{ featured: "desc" }, { sortOrder: "asc" }],
     }),
     prisma.heroBanner.findMany({
@@ -75,8 +75,8 @@ export default async function HomePage() {
       {/* Games grid */}
       <section id="games" className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">Choose Your Game</h2>
-          <p className="text-fox-muted text-sm">Tap a game to top up instantly</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">Top Up Mobile Legends</h2>
+          <p className="text-fox-muted text-sm">Choose your MLBB diamond package</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
@@ -117,7 +117,7 @@ export default async function HomePage() {
 
         <div className="grid sm:grid-cols-3 gap-5">
           {[
-            { step: "01", Icon: Gamepad2, title: "Pick a Game", desc: "Choose from our catalog of popular games." },
+            { step: "01", Icon: Gamepad2, title: "Pick a Game", desc: "Select Mobile Legends: Bang Bang." },
             { step: "02", Icon: UserRoundCheck, title: "Enter UID", desc: "Just your player ID — no password needed." },
             { step: "03", Icon: CreditCard, title: "Pay & Receive", desc: "Pay with KHQR. Credits arrive instantly." },
           ].map((s, i) => (
@@ -173,7 +173,7 @@ export default async function HomePage() {
             { q: "How long does delivery take?", a: "Instant — seconds after payment confirms. Up to 5 minutes during peak hours." },
             { q: "Is this safe for my account?", a: "Yes. We only need your UID — never your password. Orders go through licensed distributors." },
             { q: "What payment methods?", a: "KHQR supported (ABA, Wing, etc). More methods coming soon." },
-            { q: "Wrong UID?", a: "Contact us on Telegram @rithtopup immediately. We can fix it before delivery." },
+            { q: "Wrong UID?", a: "Contact us on Telegram @Tradev14 immediately. We can fix it before delivery." },
             { q: "Do I get in-game bonuses?", a: "Yes! All first-time and event bonuses apply — same as topping up in-game." },
           ].map((item, i) => (
             <details

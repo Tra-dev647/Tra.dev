@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -31,9 +31,8 @@ const updateSchema = z.object({
 
 export async function GET(
   _req: NextRequest,
-  { params: _p }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const params = await _p;
   const game = await prisma.game.findUnique({
     where: { id: params.id },
     include: {
@@ -46,9 +45,8 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params: _p }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const params = await _p;
   const body = await req.json().catch(() => ({}));
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) {
@@ -63,9 +61,8 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params: _p }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const params = await _p;
   await prisma.game.delete({ where: { id: params.id } });
   return NextResponse.json({ ok: true });
 }

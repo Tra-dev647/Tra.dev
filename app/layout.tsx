@@ -6,22 +6,19 @@ import RouteProgress from "@/components/RouteProgress";
 import AnnouncementBar from "@/components/AnnouncementBar";
 
 export const metadata: Metadata = {
-  title: "RITHTOPUP — Fast & Secure Game Top Up",
+  title: "TraTopup — MLBB Diamond Top Up",
   description:
-    "Top up Mobile Legends, Free Fire, PUBG, Genshin Impact and more. Instant delivery, secure KHQR payment. 24/7 service in Cambodia.",
+    "Top up Mobile Legends: Bang Bang Diamonds with secure KHQR payment. Fast and convenient top-up service in Cambodia.",
   keywords: [
-    "top up",
-    "mobile legends diamonds",
-    "free fire diamonds",
-    "pubg uc",
-    "genshin impact",
-    "ABA Pay",
+    "MLBB diamonds",
+    "Mobile Legends top up",
+    "Mobile Legends Diamonds Cambodia",
     "KHQR",
     "Cambodia top up",
   ],
   openGraph: {
-    title: "RITHTOPUP — Fast & Secure Game Top Up",
-    description: "Instant game top-ups with KHQR · ABA Pay · Wing · ACLEDA",
+    title: "TraTopup — MLBB Diamond Top Up",
+    description: "Instant MLBB diamond top-ups with KHQR",
     type: "website",
   },
 };

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 import { writeAudit } from "@/lib/audit";
@@ -17,9 +17,8 @@ const schema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  { params: _p }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const params = await _p;
   const body = await req.json().catch(() => ({}));
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid" }, { status: 400 });
@@ -30,9 +29,8 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params: _p }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const params = await _p;
   await prisma.heroBanner.delete({ where: { id: params.id } });
   await writeAudit({ action: "banner.delete", targetType: "banner", targetId: params.id });
   return NextResponse.json({ ok: true });

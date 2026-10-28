@@ -20,12 +20,6 @@ const createOrderSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const isPublicHttpUrl = (value?: string | null): value is string => {
-      if (!value) return false;
-      if (!/^https?:\/\//i.test(value)) return false;
-      return !/^https?:\/\/(localhost|127\.|0\.0\.0\.0|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(value);
-    };
-
     const body = await req.json();
     const parsed = createOrderSchema.safeParse(body);
     if (!parsed.success) {
@@ -149,29 +143,20 @@ export async function POST(req: NextRequest) {
       });
     });
 
-    // Generate the Bakong KHQR for this order.
+    // Build the Bakong KHQR for this order (amount in KHR). If it cannot be
+    // created (e.g. Bakong env vars missing) the order is closed so it does not
+    // stay PENDING forever.
     const requestOrigin = req.nextUrl.origin;
-    const envBase = process.env.NEXT_PUBLIC_BASE_URL;
-    const baseUrl = (isPublicHttpUrl(envBase) ? envBase : requestOrigin).replace(/\/$/, "");
-    const envPublic = process.env.PUBLIC_APP_URL;
-    const publicUrl = (isPublicHttpUrl(envPublic) ? envPublic : baseUrl).replace(/\/$/, "");
+    const envBase = (process.env.NEXT_PUBLIC_BASE_URL || "").trim();
+    const baseUrl = (/^https?:\/\/(?!localhost|127\.)/i.test(envBase) ? envBase : requestOrigin).replace(/\/$/, "");
 
     try {
       const init = await initiatePayment({
         orderNumber: order.orderNumber,
         amountUsd: order.amountUsd,
+        amountKhr: order.amountKhr ?? calcKhr(order.amountUsd, exchangeRate),
         method: data.paymentMethod,
-        returnUrl: `${publicUrl}/order?number=${order.orderNumber}`,
-        cancelUrl: `${publicUrl}/games/${game.slug}`,
-        note: `RITHTOPUP · ${game.name} · ${product.name}`,
-        customerEmail: data.customerEmail,
-        metadata: {
-          game_slug: game.slug,
-          product_name: product.name,
-          player_uid: data.playerUid,
-        },
       });
-
       await prisma.order.update({
         where: { id: order.id },
         data: {
@@ -182,8 +167,16 @@ export async function POST(req: NextRequest) {
         },
       });
     } catch (paymentErr) {
-      // Order is already created; the checkout page will show the failure.
-      console.warn("[orders] Payment init failed:", paymentErr instanceof Error ? paymentErr.message : paymentErr);
+      const reason = paymentErr instanceof Error ? paymentErr.message : String(paymentErr);
+      console.error("[orders] Payment init failed:", reason);
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { status: "FAILED", failureReason: `Payment init failed: ${reason}`.slice(0, 250) },
+      });
+      return NextResponse.json(
+        { error: "Could not create the payment QR. Please try again later." },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json({

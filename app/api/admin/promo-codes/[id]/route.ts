@@ -1,10 +1,9 @@
-import { prisma } from "@/lib/prisma";
+﻿import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PATCH(req: NextRequest, { params: _p }: { params: Promise<{ id: string }> }) {
-  const params = await _p;
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
     const promo = await prisma.promoCode.update({
@@ -23,8 +22,7 @@ export async function PATCH(req: NextRequest, { params: _p }: { params: Promise<
   }
 }
 
-export async function DELETE(_req: NextRequest, { params: _p }: { params: Promise<{ id: string }> }) {
-  const params = await _p;
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await prisma.promoCode.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });

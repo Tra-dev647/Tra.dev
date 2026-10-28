@@ -42,7 +42,7 @@ export async function verifySession(token: string): Promise<AdminSession | null>
 }
 
 export async function setSessionCookie(token: string) {
-  (await cookies()).set(SESSION_COOKIE, token, {
+  cookies().set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -52,11 +52,11 @@ export async function setSessionCookie(token: string) {
 }
 
 export async function clearSessionCookie() {
-  (await cookies()).delete(SESSION_COOKIE);
+  cookies().delete(SESSION_COOKIE);
 }
 
 export async function getCurrentAdmin(): Promise<AdminSession | null> {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const token = cookies().get(SESSION_COOKIE)?.value;
   if (!token) return null;
   return await verifySession(token);
 }

@@ -1,12 +1,17 @@
+> **TraTopup** — payments use **Bakong KHQR** (no KHPay). Orders are priced in USD and paid in KHR
+> (rounded to 100៛ using the exchange rate in Settings). There is no webhook: the checkout page
+> polls `/api/orders/<number>`, which asks Bakong whether the KHQR was paid. Any remaining mention
+> of KHPay or webhooks below is legacy documentation.
+
 <div align="center">
 
-<img src="https://img.shields.io/badge/-TRATOPUP-f97316?style=for-the-badge&labelColor=0f172a&logoColor=white" alt="TRATOPUP" />
+<img src="https://img.shields.io/badge/-TraTopup-f97316?style=for-the-badge&labelColor=0f172a&logoColor=white" alt="TraTopup" />
 
 ### ⚡ Instant game top-up storefront for Cambodia
 
-A production-ready **Next.js 16** platform for selling in-game credits — with KHQR payments, an admin control panel, and polished PDF invoices.
+A production-ready **Next.js 14** platform for selling in-game credits — with KHQR payments, an admin control panel, and polished PDF invoices.
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?logo=prisma)](https://prisma.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org)
 [![Tailwind](https://img.shields.io/badge/Tailwind-3-38BDF8?logo=tailwindcss)](https://tailwindcss.com)
@@ -18,20 +23,9 @@ A production-ready **Next.js 16** platform for selling in-game credits — with 
 
 ---
 
-## Runtime and framework versions
-
-- Node.js 24 LTS (recommended)
-- Next.js 16.4.3
-- React / React DOM 19.3.1
-- TypeScript 5.9+
-
-After switching to this release, run `npm install` to generate a fresh `package-lock.json`, then run `npm run build`. Review the Next.js 16 migration notes and resolve any API/type changes reported by the build before deploying.
-
----
-
 ## 🎯 What is this?
 
-**TRATOPUP** lets customers buy Diamonds / UC / Genesis Crystals / game passes using a single KHQR code scannable by **every major Cambodian bank app** — ABA Pay, ACLEDA Pay, Wing, TrueMoney, Chip Mong, Prince Bank, and more.
+**TraTopup** lets customers buy Diamonds / UC / Genesis Crystals / game passes using a single KHQR code scannable by **every major Cambodian bank app** — ABA Pay, ACLEDA Pay, Wing, TrueMoney, Chip Mong, Prince Bank, and more.
 
 | Customer side | Admin side |
 |---|---|
@@ -59,7 +53,7 @@ After switching to this release, run `npm install` to generate a fresh `package-
 - Order tracking with animated timeline
 
 ### 💳 Payments
-- **Bakong** integration (KHQR)
+- **Bakong KHQR** payments (KHR, verified with the official Bakong API)
 - 180-second expiring QR codes
 - HMAC-SHA256 webhook signing
 - Auto-poll fallback when webhooks fail
@@ -76,7 +70,7 @@ After switching to this release, run `npm install` to generate a fresh `package-
 - Customer list (aggregated from orders)
 - Email/phone/UID banlist
 - Audit log of every admin action
-- CSV export + Bakong refresh button
+- CSV export + KHPay refresh button (Bakong)
 
 ### 📄 Invoices
 - Generated server-side with `pdfkit`
@@ -94,7 +88,7 @@ After switching to this release, run `npm install` to generate a fresh `package-
 ## 🧱 Tech stack
 
 ```
-Next.js 16 (App Router)  ·  React 18  ·  TypeScript (strict)
+Next.js 14 (App Router)  ·  React 18  ·  TypeScript (strict)
 Prisma 5  ·  PostgreSQL (dev + prod)
 Tailwind CSS 3  ·  lucide-react icons
 jose (JWT)  ·  bcryptjs  ·  pdfkit  ·  zod
@@ -104,13 +98,13 @@ jose (JWT)  ·  bcryptjs  ·  pdfkit  ·  zod
 
 ## ⚡ Quick start (5 minutes)
 
-> **Requires** Node.js 24+, npm, and a Postgres database (free: [Neon](https://neon.tech) / [Supabase](https://supabase.com)).
+> **Requires** Node.js 20+, npm, and a Postgres database (free: [Neon](https://neon.tech) / [Supabase](https://supabase.com)).
 
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/angkerith1/tratopup-site.git
-cd tratopup-site
+git clone https://github.com/angkerith1/rithtopup-site.git
+cd rithtopup-site
 npm install
 ```
 
@@ -157,7 +151,7 @@ npm run dev
 Open **http://localhost:3000** — storefront.
 Open **http://localhost:3000/admin/login** — admin panel.
 
-✅ That's it. In simulation mode, paying for an order auto-completes after 3 seconds so you can test the full flow without Bakong credentials.
+✅ That's it. In simulation mode, paying for an order auto-completes after 3 seconds so you can test the full flow without KHPay credentials.
 
 ---
 
@@ -202,6 +196,7 @@ npm run dev
 1. Add all environment variables in Vercel (Production + Preview + Development).
 2. Ensure:
     - `PAYMENT_SIMULATION_MODE=false`
+    - `BAKONG_ACCOUNT_ID`, `BAKONG_MERCHANT_NAME` and `BAKONG_TOKEN` are set
     - `NEXT_PUBLIC_BASE_URL` and `PUBLIC_APP_URL` are your live domain
 3. From your laptop, run schema + seed against production DB:
 
@@ -240,7 +235,7 @@ Copy the connection string (must end with `?sslmode=require`).
 ### Step 2 — Import the repo into Vercel
 
 1. Go to **[vercel.com/new](https://vercel.com/new)**
-2. Import `angkerith1/tratopup-site`
+2. Import `angkerith1/rithtopup-site`
 3. Framework preset: **Next.js** (auto-detected)
 4. **Build Command:** leave as default (`npm run build`). Do **not** add `prisma db push` — run schema pushes from your laptop only.
 5. **Do not deploy yet** — add environment variables first ↓
@@ -255,6 +250,10 @@ In **Vercel → Settings → Environment Variables**, add for **Production + Pre
 | `JWT_SECRET` | Run `openssl rand -base64 32` |
 | `ADMIN_EMAIL` | Your admin login email |
 | `ADMIN_PASSWORD` | Strong password (used on first seed only) |
+| `BAKONG_ACCOUNT_ID` | Bakong account id (`name@bank`) |
+| `BAKONG_MERCHANT_NAME` | Latin letters, max 25 chars |
+| `BAKONG_TOKEN` | Bakong Open API token |
+| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | Telegram notification on paid orders |
 | `NEXT_PUBLIC_BASE_URL` | `https://your-domain.vercel.app` (no trailing slash) |
 | `PUBLIC_APP_URL` | Same as `NEXT_PUBLIC_BASE_URL` |
 | `PAYMENT_SIMULATION_MODE` | `false` |
@@ -272,10 +271,10 @@ npm run db:seed
 
 > Do this once before first login. If you skip it, you can get errors like `public.Settings does not exist`.
 
-### Step 5 — Deploy & configure Bakong webhook
+### Step 5 — Deploy & configure KHPay webhook
 
 1. Click **Deploy** in Vercel — wait for the build to finish
-2. In your **Bakong dashboard**, set webhook URL to:
+2. In your **KHPay dashboard**, set webhook URL to:
    ```
    https://your-domain.vercel.app/api/payment/webhook/khpay
    ```
@@ -294,7 +293,7 @@ npm run db:seed
 | `/admin/games` | Add / edit / reorder games |
 | `/admin/products` | Manage top-up packages per game |
 | `/admin/orders` | All orders, CSV export, clear-all |
-| `/admin/orders/[number]` | Order detail, refund, refresh from Bakong |
+| `/admin/orders/[number]` | Order detail, refund, refresh from KHPay |
 | `/admin/banners` | Homepage hero carousel |
 | `/admin/faqs` | FAQ manager (public at `/faq`) |
 | `/admin/blog` | Blog posts (public at `/blog`) |
@@ -318,7 +317,10 @@ JWT_SECRET="<32+ char random string>"
 ADMIN_EMAIL="admin@tratopup.com"
 ADMIN_PASSWORD="ChangeMeNow123!"
 
-# Bakong
+# Bakong KHQR
+BAKONG_ACCOUNT_ID=""
+BAKONG_MERCHANT_NAME=""
+BAKONG_TOKEN=""
 
 # URLs
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
@@ -331,7 +333,8 @@ PAYMENT_SIMULATION_MODE="true"            # only set true for local simulation
 Behavior notes:
 
 - Simulation mode is enabled only when `PAYMENT_SIMULATION_MODE=true`.
-- In production keep simulation off and provide real Bakong credentials.
+- If simulation is off and `KHPAY_API_KEY` is missing, order creation fails fast with config error.
+- In production keep simulation off and provide real KHPay credentials.
 
 ---
 
@@ -343,12 +346,12 @@ app/
 ├── admin/                 Admin UI (games, orders, banners, ...)
 └── api/
     ├── orders/            Public order + invoice endpoints
-    ├── payment/           Bakong init, simulate, webhook
+    ├── payment/           KHPay init, simulate, webhook
     └── admin/             Protected admin API routes
 components/                Header, Footer, GameCard, TopUpForm, carousel
 lib/
 ├── auth.ts                JWT session + bcrypt
-├── payment.ts             Bakong client + simulator
+├── payment.ts             Bakong KHQR client + simulator
 ├── telegram.ts            notifyTelegram()
 ├── audit.ts               writeAudit()
 └── prisma.ts              Shared client
@@ -402,12 +405,12 @@ against the same `DATABASE_URL` used by Vercel.
 </details>
 
 <details>
-<summary><b>Bakong QR expired / webhook never fires</b></summary>
+<summary><b>KHPay QR expired / webhook never fires</b></summary>
 
-- The QR is **valid for 180 seconds** — this is a Bakong limit, not a bug.
-- Webhook URL in Bakong dashboard must be `https://your-domain/api/payment/webhook/khpay` (HTTPS, not localhost).
+- The QR is **valid for 180 seconds** — this is a KHPay limit, not a bug.
+- Webhook URL in KHPay dashboard must be `https://your-domain/api/payment/webhook/khpay` (HTTPS, not localhost).
 - For local testing use a tunnel: `cloudflared tunnel --url http://localhost:3000` and set `PUBLIC_APP_URL` to the tunnel URL.
-- If the webhook doesn't reach you, the order-detail page auto-polls Bakong every 3 seconds — the order will still flip to PAID.
+- If the webhook doesn't reach you, the order-detail page auto-polls KHPay every 3 seconds — the order will still flip to PAID.
 </details>
 
 <details>
@@ -448,6 +451,7 @@ Nickname lookup depends on a third-party validation API and can fail intermitten
 - [ ] Change `ADMIN_PASSWORD` from the default
 - [ ] `JWT_SECRET` is 32+ random chars, different from any other project
 - [ ] `PAYMENT_SIMULATION_MODE=false` in production
+- [ ] `KHPAY_WEBHOOK_SECRET` matches the one configured in KHPay dashboard
 - [ ] Custom domain set in Vercel with HTTPS enforced
 - [ ] `.env` is **not** committed (verify with `git ls-files | grep .env`)
 - [ ] Admin users are created via the seed script, not hardcoded
@@ -456,13 +460,13 @@ Nickname lookup depends on a third-party validation API and can fail intermitten
 
 ## 📄 License
 
-Private — © TRATOPUP. All rights reserved.
+Private — © TraTopup. All rights reserved.
 
 ---
 
 <div align="center">
 
 Built with ⚡ for the Cambodian gaming community.
-Support: **[@tratopup](https://t.me/tratopup)** on Telegram.
+Support: **[@Tradev14](https://t.me/rithtopup)** on Telegram.
 
 </div>

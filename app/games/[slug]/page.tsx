@@ -8,8 +8,7 @@ import { ArrowLeft, Zap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function GamePage({ params: _p }: { params: Promise<{ slug: string }> }) {
-  const params = await _p;
+export default async function GamePage({ params }: { params: { slug: string } }) {
   const game = await prisma.game.findUnique({
     where: { slug: params.slug },
     include: {
@@ -20,7 +19,7 @@ export default async function GamePage({ params: _p }: { params: Promise<{ slug:
     },
   });
 
-  if (!game || !game.active) notFound();
+  if (!game || !game.active || game.slug !== "mobile-legends") notFound();
 
   return (
     <>

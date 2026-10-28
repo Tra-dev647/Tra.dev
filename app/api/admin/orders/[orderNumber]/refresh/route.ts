@@ -3,17 +3,17 @@ export const dynamic = "force-dynamic";
 
 import { writeAudit } from "@/lib/audit";
 import { fetchPaymentStatus } from "@/lib/payment";
+import { markOrderPaid } from "@/lib/orderPaid";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Admin debug endpoint: pulls the latest Bakong status for an order
- * and, if paid, flips the order to PAID.
+ * Admin endpoint: asks Bakong whether the order's KHQR was paid and, if so,
+ * flips the order to PAID (and sends the Telegram notification).
  */
 export async function POST(
   _req: NextRequest,
-  { params: _p }: { params: Promise<{ orderNumber: string }> }
+  { params }: { params: { orderNumber: string } }
 ) {
-  const params = await _p;
   const order = await prisma.order.findUnique({
     where: { orderNumber: params.orderNumber },
   });
@@ -23,31 +23,13 @@ export async function POST(
     return NextResponse.json({ error: "No Bakong reference on order" }, { status: 400 });
   }
 
-  const remote = await fetchPaymentStatus(order.paymentRef, { amountUsd: order.amountUsd });
+  const remote = await fetchPaymentStatus(order.paymentRef, order.amountKhr ?? 0);
 
-  let updated = order;
-  if (remote && (remote.paid || remote.status === "paid") && order.status === "PENDING") {
-    updated = await prisma.order.update({
-      where: { id: order.id },
-      data: { status: "PAID", paidAt: new Date() },
-    });
+  let updated = false;
+  if (remote?.paid && order.status === "PENDING") {
+    updated = await markOrderPaid(order.id);
     await writeAudit({
       action: "order.bakong_refresh.auto_paid",
-      targetType: "order",
-      targetId: order.id,
-      details: { paymentRef: order.paymentRef, remote },
-    });
-  } else if (
-    remote &&
-    (remote.status === "expired" || remote.status === "failed") &&
-    order.status === "PENDING"
-  ) {
-    updated = await prisma.order.update({
-      where: { id: order.id },
-      data: { status: "FAILED", failureReason: `Bakong: ${remote.status}` },
-    });
-    await writeAudit({
-      action: "order.bakong_refresh.auto_failed",
       targetType: "order",
       targetId: order.id,
       details: { paymentRef: order.paymentRef, remote },
@@ -61,5 +43,6 @@ export async function POST(
     details: { paymentRef: order.paymentRef, remote },
   });
 
-  return NextResponse.json({ remote, order: updated });
+  const fresh = await prisma.order.findUnique({ where: { id: order.id } });
+  return NextResponse.json({ remote, updated, order: fresh });
 }

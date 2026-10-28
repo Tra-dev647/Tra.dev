@@ -3,12 +3,12 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { fetchPaymentStatus } from "@/lib/payment";
+import { markOrderPaid } from "@/lib/orderPaid";
 
 export async function GET(
   _req: NextRequest,
-  { params: _p }: { params: Promise<{ orderNumber: string }> }
+  { params }: { params: { orderNumber: string } }
 ) {
-  const params = await _p;
   let order = await prisma.order.findUnique({
     where: { orderNumber: params.orderNumber.toUpperCase() },
     include: {
@@ -21,39 +21,32 @@ export async function GET(
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  // Bakong has no webhooks: poll its API while the order is still PENDING.
+  // Bakong has no webhook, so we check the KHQR payment while the customer is
+  // watching the checkout page (the page polls this endpoint every few seconds).
   if (order.status === "PENDING" && order.paymentRef && !order.paymentRef.startsWith("SIM-")) {
     try {
-      const remote = await fetchPaymentStatus(order.paymentRef, { amountUsd: order.amountUsd });
-      const isPaid = remote?.paid === true || remote?.status === "paid";
-      if (isPaid) {
-        order = await prisma.order.update({
-          where: { id: order.id },
-          data: { status: "PAID", paidAt: new Date() },
-          include: {
-            game: { select: { name: true, slug: true } },
-            product: { select: { name: true } },
-          },
-        });
+      const remote = await fetchPaymentStatus(order.paymentRef, order.amountKhr ?? 0);
+      if (remote?.paid) {
+        await markOrderPaid(order.id);
       } else if (
-        remote &&
         order.paymentExpiresAt &&
-        order.paymentExpiresAt.getTime() + 60_000 < Date.now()
+        Date.now() > order.paymentExpiresAt.getTime() + 90_000
       ) {
-        order = await prisma.order.update({
-          where: { id: order.id },
-          data: {
-            status: "CANCELLED",
-            failureReason: "Bakong QR expired",
-          },
-          include: {
-            game: { select: { name: true, slug: true } },
-            product: { select: { name: true } },
-          },
+        // QR expired (+90s grace for payments made right at the deadline)
+        await prisma.order.updateMany({
+          where: { id: order.id, status: "PENDING" },
+          data: { status: "CANCELLED", failureReason: "QR expired" },
         });
       }
+      order = (await prisma.order.findUnique({
+        where: { id: order.id },
+        include: {
+          game: { select: { name: true, slug: true } },
+          product: { select: { name: true } },
+        },
+      })) ?? order;
     } catch {
-      // Silently ignore poll errors â€” we'll retry on the next request.
+      // Ignore poll errors — we retry on the next request.
     }
   }
 
